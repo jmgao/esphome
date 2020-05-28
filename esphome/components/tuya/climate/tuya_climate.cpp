@@ -7,7 +7,6 @@ namespace tuya {
 static const char *TAG = "tuya.climate";
 
 void TuyaClimate::setup() {
-
   if (this->switch_id_.has_value()) {
     this->parent_->register_listener(*this->switch_id_, [this](TuyaDatapoint datapoint) {
       if (datapoint.value_bool) {
@@ -113,8 +112,9 @@ void TuyaClimate::compute_state_() {
     this->switch_to_action_(climate::CLIMATE_ACTION_OFF);
     return;
   }
-  const bool too_cold = this->current_temperature < this->target_temperature;
-  const bool too_hot = this->current_temperature > this->target_temperature;
+  const bool too_cold = this->current_temperature < this->target_temperature - 1;
+  const bool too_hot = this->current_temperature > this->target_temperature + 1;
+  const bool on_target = this->current_temperature == this->target_temperature;
 
   climate::ClimateAction target_action;
   if (too_cold) {
@@ -131,8 +131,10 @@ void TuyaClimate::compute_state_() {
     } else {
       target_action = climate::CLIMATE_ACTION_IDLE;
     }
-  } else {
+  } else if(on_target) {
     target_action = climate::CLIMATE_ACTION_IDLE;
+  } else {
+    target_action = this->action;
   }
   this->switch_to_action_(target_action);
 }
