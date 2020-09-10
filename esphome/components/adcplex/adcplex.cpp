@@ -14,11 +14,11 @@ void ADCPLEXComponent::dump_config() {
   }
 }
 
-float ADCPLEXComponent::request_measurement(ADCPLEXSensor *sensor) {
-  digitalWrite(sensor->get_power_pin(), HIGH);
-  delay(sensor->get_delay());
-  sensor->publish_state(this->adc_.get_state());
-  digitalWrite(sensor->get_power_pin(), LOW);
+void ADCPLEXSensor::update() {
+  digitalWrite(this->get_power_pin(), HIGH);
+  delay(this->get_delay());
+  publish_state(this->parent_->adc_->get_state());
+  digitalWrite(this->get_power_pin(), LOW);
 }
 
 }  // namespace ADCPLEX
