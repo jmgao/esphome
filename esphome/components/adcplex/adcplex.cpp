@@ -1,4 +1,4 @@
-#include "adc_plexer.h"
+#include "adcplex.h"
 #include "esphome/core/log.h"
 
 namespace esphome {
@@ -14,18 +14,12 @@ void ADCPLEXComponent::dump_config() {
   }
 }
 
-void ADCPLEXSensor::setup() {
-  GPIOPin(this->power_pin, OUTPUT).setup();
-  // ADCSensor::set_pin(analog_pin); //(Pins::analog_pin('A0'))
-  ADCSensor::setup();
-};
-
-void ADCPLEXSensor::update() {
-    digitalWrite(power_pin, HIGH);
-    delay(this->delay);
-    ADCSensor::update();
-    digitalWrite(power_pin, LOW);
-};
+float ADCPLEXComponent::request_measurement(ADCPLEXSensor *sensor) {
+  digitalWrite(sensor->get_power_pin(), HIGH);
+  delay(sensor->get_delay());
+  sensor->publish_state(this->adc_.get_state());
+  digitalWrite(sensor->get_power_pin(), LOW);
+}
 
 }  // namespace ADCPLEX
 }  // namespace esphome
