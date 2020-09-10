@@ -11,6 +11,7 @@ class ADCPlexSensor;
 class ADCPLEXComponent : public Component {
     public:
         void register_sensor(ADCPLEXSensor *obj) { this->sensors_.push_back(obj); }
+        void update() override;
         void dump_config() override;
 
         void set_adc(sensor::ADCSensor *adc) { this->adc_ = adc; }
