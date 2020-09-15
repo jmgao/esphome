@@ -5,7 +5,7 @@ services:
     build: .
     container_name: esphome_test
     volumes:
-      - /home/astro/dev/esphome/test_app:/config
+      - /home/astro/dev/test_app:/config
     ports:
       - 7052:6052
       - 7053:6053
