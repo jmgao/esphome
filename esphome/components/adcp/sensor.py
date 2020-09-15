@@ -1,7 +1,6 @@
-  
-  
 import esphome.codegen as cg
 import esphome.config_validation as cv
+from esphome import pins
 from esphome.components import sensor
 from esphome.const import CONF_PIN, CONF_DELAY, ICON_FLASH, UNIT_VOLT, CONF_ID
 from . import  ADCPLEXComponent
@@ -11,7 +10,7 @@ DEPENDENCIES = ['adcp']
 
 ADCPLEXSensor = ADCPLEX_ns.class_('ADCPLEXSensor', sensor.ADCSensor)
 
-CONF_ADCPLEX_ID = 'ADCPLEX_id'
+CONF_ADCPLEX_ID = 'adcp_id'
 CONFIG_SCHEMA = sensor.sensor_schema(UNIT_VOLT, ICON_FLASH, 3).extend({
     cv.GenerateID(): cv.declare_id(ADCPLEXSensor),
     cv.GenerateID(CONF_ADCPLEX_ID): cv.use_id(ADCPLEXComponent),

@@ -1,23 +1,19 @@
-#include "adcplex.h"
+#include "adcp.h"
 #include "esphome/core/log.h"
 
 namespace esphome {
-namespace ADCPLEX {
+namespace adcp {
 
-static const char *TAG = "ADCPLEX";
+static const char *TAG = "ADCP";
 
-void ADCPLEXComponent::dump_config() {
-  ESP_LOGCONFIG(TAG, "Setting up ADCPLEX...");
-
-  for (auto *sensor : this->sensors_) {
-    LOG_SENSOR("  ", "Sensor", sensor);
-  }
+void ADCPComponent::dump_config() {
+  ESP_LOGCONFIG(TAG, "Setting up ADCP...");
 }
 
-void ADCPLEXSensor::update() {
+void ADCPSensor::update() {
   digitalWrite(this->get_power_pin(), HIGH);
   delay(this->get_delay());
-  publish_state(this->parent_->adc_->get_state());
+  publish_state(this->parent_->get_adc()->get_state()); // find_adc(this->get_adc_id())
   digitalWrite(this->get_power_pin(), LOW);
 }
 
