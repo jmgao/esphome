@@ -1,12 +1,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.const import CONF_ID, CONF_ADC
+from esphome.const import CONF_ID, CONF_SENSOR_ID
 
 
 AUTO_LOAD = ['sensor']
 MULTI_CONF = True
 
-ADCPLEX_ns = cg.esphome_ns.namespace('adcplex')
+ADCPLEX_ns = cg.esphome_ns.namespace('adcp')
 ADCPLEXComponent = ADCPLEX_ns.class_('ADCPLEXComponent', cg.Component)
 
 CONFIG_SCHEMA = cv.Schema({
