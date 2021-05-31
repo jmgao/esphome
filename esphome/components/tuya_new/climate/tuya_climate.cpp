@@ -40,30 +40,19 @@ void TuyaClimate::setup() {
 }
 
 void TuyaClimate::control(const climate::ClimateCall &call) {
+  std::vector<uint8_t> data;
+  data.resize(15);
   if (call.get_mode().has_value()) {
     this->mode = *call.get_mode();
-
-    TuyaDatapoint datapoint{};
-    datapoint.id = *this->switch_id_;
-    datapoint.type = TuyaDatapointType::BOOLEAN;
-    datapoint.value_bool = this->mode != climate::CLIMATE_MODE_OFF;
-    this->parent_->set_datapoint_value(datapoint);
-    ESP_LOGD(TAG, "Setting switch: %s", ONOFF(datapoint.value_bool));
+    data[*this->switch_id_] = this->mode == climate::CLIMATE_MODE_OFF ? 0x02 : 0x01;
   }
 
   if (call.get_target_temperature().has_value()) {
     this->target_temperature = *call.get_target_temperature();
-
-    TuyaDatapoint datapoint{};
-    datapoint.id = *this->target_temperature_id_;
-    datapoint.type = TuyaDatapointType::INTEGER;
-    datapoint.value_int = (int) (this->target_temperature / this->target_temperature_multiplier_);
-    this->parent_->set_datapoint_value(datapoint);
-    ESP_LOGD(TAG, "Setting target temperature: %.1f", this->target_temperature);
+    data[*this->target_temperature_id_] = (int) (this->target_temperature / this->target_temperature_multiplier_);
   }
 
-  this->compute_state_();
-  this->publish_state();
+  this->parent_->set_datapoint_value(data);
 }
 
 climate::ClimateTraits TuyaClimate::traits() {

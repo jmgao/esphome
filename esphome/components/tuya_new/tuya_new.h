@@ -62,7 +62,7 @@ class Tuya : public Component, public uart::UARTDevice {
   void loop() override;
   void dump_config() override;
   void register_listener(uint8_t datapoint_id, TuyaDatapointType type, const std::function<void(TuyaDatapoint)> &func);
-  void set_datapoint_value(TuyaDatapoint datapoint);
+  void set_datapoint_value(std::vector<uint8_t> &data);
   void add_ignore_mcu_update_on_datapoints(uint8_t ignore_mcu_update_on_datapoints) {
     this->ignore_mcu_update_on_datapoints_.push_back(ignore_mcu_update_on_datapoints);
   }

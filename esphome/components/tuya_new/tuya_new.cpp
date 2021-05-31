@@ -226,7 +226,7 @@ void Tuya::handle_datapoint_(const uint8_t *buffer, size_t len) {
 
     switch (datapoint.type) {
       case TuyaDatapointType::BOOLEAN:
-        datapoint.value_bool = buffer[datapoint.id];
+        datapoint.value_bool = buffer[datapoint.id] == 0x01;
         break;
       case TuyaDatapointType::INTEGER:
         datapoint.value_uint = buffer[datapoint.id];
@@ -256,8 +256,7 @@ void Tuya::handle_datapoint_(const uint8_t *buffer, size_t len) {
 }
 
 void Tuya::send_raw_command_(TuyaCommand command) {
-  uint8_t len_hi = (uint8_t)(command.payload.size() >> 8);
-  uint8_t len_lo = (uint8_t)(command.payload.size() & 0xFF);
+  uint8_t length = (uint8_t)(command.payload.size());
 
   this->last_command_timestamp_ = millis();
 
@@ -293,58 +292,9 @@ void Tuya::send_empty_command_(TuyaCommandType command) {
   send_command_(TuyaCommand{.cmd = command, .payload = std::vector<uint8_t>{0x00}});
 }
 
-void Tuya::set_datapoint_value(TuyaDatapoint datapoint) {
-  std::vector<uint8_t> buffer;
-  ESP_LOGV(TAG, "Datapoint %u set to %u", datapoint.id, datapoint.value_uint);
-  for (auto &other : this->datapoints_) {
-    if (other.id == datapoint.id) {
-      // String value is stored outside the union; must be checked separately.
-      if (datapoint.type == TuyaDatapointType::STRING) {
-        if (other.value_string == datapoint.value_string) {
-          ESP_LOGV(TAG, "Not sending unchanged value");
-          return;
-        }
-      } else if (other.value_uint == datapoint.value_uint) {
-        ESP_LOGV(TAG, "Not sending unchanged value");
-        return;
-      }
-    }
-  }
-  buffer.push_back(datapoint.id);
-  buffer.push_back(static_cast<uint8_t>(datapoint.type));
-
-  std::vector<uint8_t> data;
-  switch (datapoint.type) {
-    case TuyaDatapointType::BOOLEAN:
-      data.push_back(datapoint.value_bool);
-      break;
-    case TuyaDatapointType::INTEGER:
-      data.push_back(datapoint.value_uint >> 24);
-      data.push_back(datapoint.value_uint >> 16);
-      data.push_back(datapoint.value_uint >> 8);
-      data.push_back(datapoint.value_uint >> 0);
-      break;
-    case TuyaDatapointType::STRING:
-      for (char const &c : datapoint.value_string) {
-        data.push_back(c);
-      }
-      break;
-    case TuyaDatapointType::ENUM:
-      data.push_back(datapoint.value_enum);
-      break;
-    case TuyaDatapointType::BITMASK:
-      data.push_back(datapoint.value_bitmask >> 8);
-      data.push_back(datapoint.value_bitmask >> 0);
-      break;
-    default:
-      return;
-  }
-
-  buffer.push_back(data.size() >> 8);
-  buffer.push_back(data.size() >> 0);
-  buffer.insert(buffer.end(), data.begin(), data.end());
-
-  // this->send_command_(TuyaCommand{.cmd = TuyaCommandType::DATAPOINT_DELIVER, .payload = buffer});
+void Tuya::set_datapoint_value(std::vector<uint8_t> &data) {
+  data.insert(data.begin(), data.size() + 1);
+  this->send_command_(TuyaCommand{.cmd = TuyaCommandType::DATA_UPDATE, .payload = data});
 }
 
 void Tuya::register_listener(uint8_t datapoint_id, TuyaDatapointType type,
