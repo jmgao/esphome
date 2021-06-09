@@ -873,3 +873,5 @@ ESP32_C3_BOARD_PINS = {
     "esp32-c3-devkitm-1": {"LED": 8},
     "esp32-c3-devkitc-02": "esp32-c3-devkitm-1",
 }
+
+STSTM32_BOARD_PINS = {"bluepill_f103c8_128k": {}}

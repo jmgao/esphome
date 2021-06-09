@@ -56,6 +56,8 @@ def validate_board(value: str):
     elif CORE.is_esp32:
         boardlist = list(boards.ESP32_BOARD_PINS.keys())
         boardlist += list(boards.ESP32_C3_BOARD_PINS.keys())
+    elif CORE.is_ststm32:
+        boardlist = list(boards.STSTM32_BOARD_PINS.keys())
     else:
         raise NotImplementedError
 
@@ -121,6 +123,8 @@ def validate_arduino_version(value):
             )
         if value_ in PLATFORMIO_ESP32_LUT:
             return PLATFORMIO_ESP32_LUT[value_]
+        return value
+    if CORE.is_ststm32:
         return value
     raise NotImplementedError
 

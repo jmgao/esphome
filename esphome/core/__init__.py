@@ -608,6 +608,12 @@ class EsphomeCore:
         """Check if the ESP32-C3 SoC is being used."""
         return self.is_esp32 and self.board in boards.ESP32_C3_BOARD_PINS
 
+    @property
+    def is_ststm32(self):
+        if self.esp_platform is None:
+            raise ValueError("No platform specified")
+        return self.esp_platform == "STSTM32"
+
     def add_job(self, func, *args, **kwargs):
         self.event_loop.add_job(func, *args, **kwargs)
 
