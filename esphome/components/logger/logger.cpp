@@ -125,12 +125,14 @@ Logger::Logger(uint32_t baud_rate, size_t tx_buffer_size, UARTSelection uart)
 void Logger::pre_setup() {
   if (this->baud_rate_ > 0) {
     switch (this->uart_) {
+#if ! defined ARDUINO_ARCH_STM32
       case UART_SELECTION_UART0:
 #ifdef ARDUINO_ARCH_ESP8266
       case UART_SELECTION_UART0_SWAP:
 #endif
         this->hw_serial_ = &Serial;
         break;
+#endif
       case UART_SELECTION_UART1:
         this->hw_serial_ = &Serial1;
         break;
@@ -184,6 +186,9 @@ const char *const UART_SELECTIONS[] = {"UART0", "UART1", "UART2"};
 #endif
 #ifdef ARDUINO_ARCH_ESP8266
 const char *const UART_SELECTIONS[] = {"UART0", "UART1", "UART0_SWAP"};
+#endif
+#ifdef ARDUINO_ARCH_STM32
+const char *const UART_SELECTIONS[] = {"UART0", "UART1", "UART2"};
 #endif
 void Logger::dump_config() {
   ESP_LOGCONFIG(TAG, "Logger:");

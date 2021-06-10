@@ -93,7 +93,7 @@ template<typename T> T clamp(T val, T min, T max);
 float lerp(float completion, float start, float end);
 
 /// std::make_unique
-template<typename T, typename... Args> std::unique_ptr<T> make_unique(Args &&...args) {
+template<typename T, typename... Args> std::unique_ptr<T> make_unique(Args &&... args) {
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 

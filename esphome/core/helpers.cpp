@@ -2,9 +2,9 @@
 #include <cstdio>
 #include <algorithm>
 
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
-#else
+#elif defined ARDUINO_ARCH_ESP32
 #include <Esp.h>
 #endif
 
@@ -44,10 +44,12 @@ std::string get_mac_address_pretty() {
 std::string generate_hostname(const std::string &base) { return base + std::string("-") + get_mac_address(); }
 
 uint32_t random_uint32() {
-#ifdef ARDUINO_ARCH_ESP32
+#if defined ARDUINO_ARCH_ESP32
   return esp_random();
-#else
+#elif defined ARDUINO_ARCH_ESP8266
   return os_random();
+#else
+  return random();
 #endif
 }
 
