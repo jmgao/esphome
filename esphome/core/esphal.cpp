@@ -33,7 +33,7 @@ GPIOPin::GPIOPin(uint8_t pin, uint8_t mode, bool inverted)
       gpio_clear_(&GPIO.out_w1tc.val),
       gpio_read_(&GPIO.in.val),
 #else
-      gpio_set_(pin < 32 ? &GPIO.out_w1ts : &GPIO.out1_w1ts.val),
+          gpio_set_(pin < 32 ? &GPIO.out_w1ts : &GPIO.out1_w1ts.val),
       gpio_clear_(pin < 32 ? &GPIO.out_w1tc : &GPIO.out1_w1tc.val),
       gpio_read_(pin < 32 ? &GPIO.in : &GPIO.in1.val),
 #endif
