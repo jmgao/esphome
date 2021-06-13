@@ -20,6 +20,9 @@ def _lookup_pin(value):
         else:
             board_pins_dict = boards.ESP32_BOARD_PINS
             base_pins = boards.ESP32_BASE_PINS
+    elif CORE.is_ststm32:
+        board_pins_dict = boards.STM32_BOARD_PINS
+        base_pins = boards.STM32_BASE_PINS
     else:
         raise NotImplementedError
 
