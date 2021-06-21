@@ -141,6 +141,14 @@ api:
       then:
         - dfplayer.random
 
+    - service: dfplayer_volume_up
+      then:
+        - dfplayer.volume_up
+
+    - service: dfplayer_volume_down
+      then:
+        - dfplayer.volume_down
+
     - service: battery_level_percent
       variables:
         level_percent: int
@@ -650,6 +658,17 @@ script:
   - id: my_script
     then:
       - lambda: 'ESP_LOGD("main", "Hello World!");'
+  - id: climate_custom
+    then:
+      - climate.control:
+          id: midea_ac_unit
+          custom_preset: FREEZE_PROTECTION
+          custom_fan_mode: SILENT
+  - id: climate_preset
+    then:
+      - climate.control:
+          id: midea_ac_unit
+          preset: SLEEP
 
 sm2135:
   data_pin: GPIO12
@@ -811,6 +830,32 @@ climate:
       kp: 0.0
       ki: 0.0
       kd: 0.0
+  - platform: midea_ac
+    id: midea_ac_unit
+    visual:
+      min_temperature: 18 °C
+      max_temperature: 25 °C
+      temperature_step: 0.1 °C
+    name: "Electrolux EACS"
+    beeper: true
+    custom_fan_modes:
+      - SILENT
+      - TURBO
+    preset_eco: true
+    preset_sleep: true
+    preset_boost: true
+    custom_presets:
+      - FREEZE_PROTECTION
+    outdoor_temperature:
+      name: "Temp"
+    power_usage:
+      name: "Power"
+    humidity_setpoint:
+      name: "Hum"
+
+midea_dongle:
+  uart_id: uart1
+  strength_icon: true
 
 cover:
   - platform: endstop
@@ -1052,27 +1097,27 @@ fingerprint_grow:
   new_password: 0xA65B9840
   on_finger_scan_matched:
     - homeassistant.event:
-        event: esphome.${devicename}_fingerprint_grow_finger_scan_matched
+        event: esphome.${device_name}_fingerprint_grow_finger_scan_matched
         data:
           finger_id: !lambda 'return finger_id;'
           confidence: !lambda 'return confidence;'
   on_finger_scan_unmatched:
     - homeassistant.event:
-        event: esphome.${devicename}_fingerprint_grow_finger_scan_unmatched
+        event: esphome.${device_name}_fingerprint_grow_finger_scan_unmatched
   on_enrollment_scan:
     - homeassistant.event:
-        event: esphome.${devicename}_fingerprint_grow_enrollment_scan
+        event: esphome.${device_name}_fingerprint_grow_enrollment_scan
         data:
           finger_id: !lambda 'return finger_id;'
           scan_num: !lambda 'return scan_num;'
   on_enrollment_done:
     - homeassistant.event:
-        event: esphome.${devicename}_fingerprint_grow_node_enrollment_done
+        event: esphome.${device_name}_fingerprint_grow_node_enrollment_done
         data:
           finger_id: !lambda 'return finger_id;'
   on_enrollment_failed:
     - homeassistant.event:
-        event: esphome.${devicename}_fingerprint_grow_enrollment_failed
+        event: esphome.${device_name}_fingerprint_grow_enrollment_failed
         data:
           finger_id: !lambda 'return finger_id;'
   uart_id: uart6

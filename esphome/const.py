@@ -1,7 +1,7 @@
 """Constants used by esphome."""
 
 MAJOR_VERSION = 1
-MINOR_VERSION = 19
+MINOR_VERSION = 20
 PATCH_VERSION = "0-dev"
 __short_version__ = f"{MAJOR_VERSION}.{MINOR_VERSION}"
 __version__ = f"{__short_version__}.{PATCH_VERSION}"
@@ -28,6 +28,7 @@ ARDUINO_VERSION_ESP32 = {
 # See also https://github.com/platformio/platform-espressif8266/releases
 ARDUINO_VERSION_ESP8266 = {
     "dev": "https://github.com/platformio/platform-espressif8266.git",
+    "3.0.0": "platformio/espressif8266@3.0.0",
     "2.7.4": "platformio/espressif8266@2.6.2",
     "2.7.3": "platformio/espressif8266@2.6.1",
     "2.7.2": "platformio/espressif8266@2.6.0",
@@ -145,6 +146,10 @@ CONF_CSS_URL = "css_url"
 CONF_CURRENT = "current"
 CONF_CURRENT_OPERATION = "current_operation"
 CONF_CURRENT_RESISTOR = "current_resistor"
+CONF_CUSTOM_FAN_MODE = "custom_fan_mode"
+CONF_CUSTOM_FAN_MODES = "custom_fan_modes"
+CONF_CUSTOM_PRESET = "custom_preset"
+CONF_CUSTOM_PRESETS = "custom_presets"
 CONF_DALLAS_ID = "dallas_id"
 CONF_DATA = "data"
 CONF_DATA_PIN = "data_pin"
@@ -449,8 +454,13 @@ CONF_POWER_FACTOR = "power_factor"
 CONF_POWER_ON_VALUE = "power_on_value"
 CONF_POWER_SAVE_MODE = "power_save_mode"
 CONF_POWER_SUPPLY = "power_supply"
+CONF_PRESET = "preset"
+CONF_PRESET_BOOST = "preset_boost"
+CONF_PRESET_ECO = "preset_eco"
+CONF_PRESET_SLEEP = "preset_sleep"
 CONF_PRESSURE = "pressure"
 CONF_PRIORITY = "priority"
+CONF_PROJECT = "project"
 CONF_PROTOCOL = "protocol"
 CONF_PULL_MODE = "pull_mode"
 CONF_PULSE_LENGTH = "pulse_length"
@@ -538,6 +548,7 @@ CONF_SPIKE_REJECTION = "spike_rejection"
 CONF_SSID = "ssid"
 CONF_SSL_FINGERPRINTS = "ssl_fingerprints"
 CONF_STATE = "state"
+CONF_STATE_CLASS = "state_class"
 CONF_STATE_TOPIC = "state_topic"
 CONF_STATIC_IP = "static_ip"
 CONF_STATUS = "status"
@@ -607,6 +618,7 @@ CONF_UUID = "uuid"
 CONF_VALUE = "value"
 CONF_VARIABLES = "variables"
 CONF_VARIANT = "variant"
+CONF_VERSION = "version"
 CONF_VISUAL = "visual"
 CONF_VOLTAGE = "voltage"
 CONF_VOLTAGE_ATTENUATION = "voltage_attenuation"
@@ -768,3 +780,9 @@ DEVICE_CLASS_POWER_FACTOR = "power_factor"
 DEVICE_CLASS_PRESSURE = "pressure"
 DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
+
+# state classes
+STATE_CLASS_NONE = ""
+
+# The state represents a measurement in present time
+STATE_CLASS_MEASUREMENT = "measurement"
