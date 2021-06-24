@@ -1,7 +1,13 @@
 from esphome.components import climate
 import esphome.config_validation as cv
 import esphome.codegen as cg
-from esphome.const import CONF_ID, CONF_SWITCH_DATAPOINT
+from esphome.const import (
+    CONF_HYSTERESIS,
+    CONF_ID,
+    CONF_SUPPORTS_COOL,
+    CONF_SUPPORTS_HEAT,
+    CONF_SWITCH_DATAPOINT,
+)
 from .. import tuya_ns, CONF_TUYA_ID, Tuya
 
 DEPENDENCIES = ["tuya_new"]
@@ -64,12 +70,15 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(TuyaClimate),
             cv.GenerateID(CONF_TUYA_ID): cv.use_id(Tuya),
+            cv.Optional(CONF_SUPPORTS_HEAT, default=True): cv.boolean,
+            cv.Optional(CONF_SUPPORTS_COOL, default=False): cv.boolean,
             cv.Optional(CONF_SWITCH_DATAPOINT): cv.uint8_t,
             cv.Optional(CONF_TARGET_TEMPERATURE_DATAPOINT): cv.uint8_t,
             cv.Optional(CONF_CURRENT_TEMPERATURE_DATAPOINT): cv.uint8_t,
             cv.Optional(CONF_TEMPERATURE_MULTIPLIER): cv.positive_float,
             cv.Optional(CONF_CURRENT_TEMPERATURE_MULTIPLIER): cv.positive_float,
             cv.Optional(CONF_TARGET_TEMPERATURE_MULTIPLIER): cv.positive_float,
+            cv.Optional(CONF_HYSTERESIS): cv.float_,
         }
     ).extend(cv.COMPONENT_SCHEMA),
     cv.has_at_least_one_key(CONF_TARGET_TEMPERATURE_DATAPOINT, CONF_SWITCH_DATAPOINT),
@@ -77,13 +86,16 @@ CONFIG_SCHEMA = cv.All(
 )
 
 
-def to_code(config):
+async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    yield cg.register_component(var, config)
-    yield climate.register_climate(var, config)
+    await cg.register_component(var, config)
+    await climate.register_climate(var, config)
 
-    paren = yield cg.get_variable(config[CONF_TUYA_ID])
+    paren = await cg.get_variable(config[CONF_TUYA_ID])
     cg.add(var.set_tuya_parent(paren))
+
+    cg.add(var.set_supports_heat(config[CONF_SUPPORTS_HEAT]))
+    cg.add(var.set_supports_cool(config[CONF_SUPPORTS_COOL]))
 
     if CONF_SWITCH_DATAPOINT in config:
         cg.add(var.set_switch_id(config[CONF_SWITCH_DATAPOINT]))
@@ -111,3 +123,6 @@ def to_code(config):
                 config[CONF_TARGET_TEMPERATURE_MULTIPLIER]
             )
         )
+
+    if CONF_HYSTERESIS in config:
+        cg.add(var.set_hysteresis(config[CONF_HYSTERESIS]))

@@ -11,6 +11,8 @@ class TuyaClimate : public climate::Climate, public Component {
  public:
   void setup() override;
   void dump_config() override;
+  void set_supports_heat(bool supports_heat) { this->supports_heat_ = supports_heat; }
+  void set_supports_cool(bool supports_cool) { this->supports_cool_ = supports_cool; }
   void set_switch_id(uint8_t switch_id) { this->switch_id_ = switch_id; }
   void set_target_temperature_id(uint8_t target_temperature_id) {
     this->target_temperature_id_ = target_temperature_id;
@@ -27,6 +29,8 @@ class TuyaClimate : public climate::Climate, public Component {
 
   void set_tuya_parent(Tuya *parent) { this->parent_ = parent; }
 
+  void set_hysteresis(float hysteresis) { this->hysteresis_ = hysteresis; }
+
  protected:
   /// Override control to change settings of the climate device.
   void control(const climate::ClimateCall &call) override;
@@ -40,11 +44,14 @@ class TuyaClimate : public climate::Climate, public Component {
   void switch_to_action_(climate::ClimateAction action);
 
   Tuya *parent_;
+  bool supports_heat_;
+  bool supports_cool_;
   optional<uint8_t> switch_id_{};
   optional<uint8_t> target_temperature_id_{};
   optional<uint8_t> current_temperature_id_{};
   float current_temperature_multiplier_{1.0f};
   float target_temperature_multiplier_{1.0f};
+  float hysteresis_{1.0f};
 };
 
 }  // namespace tuya_new

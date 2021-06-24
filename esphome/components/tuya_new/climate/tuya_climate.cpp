@@ -9,32 +9,37 @@ static const char *TAG = "tuya.climate";
 void TuyaClimate::setup() {
   if (this->switch_id_.has_value()) {
     this->parent_->register_listener(*this->switch_id_, TuyaDatapointType::BOOLEAN, [this](TuyaDatapoint datapoint) {
+      ESP_LOGD(TAG, "MCU reported switch is: %s", ONOFF(datapoint.value_bool));
+      this->mode = climate::CLIMATE_MODE_OFF;
       if (datapoint.value_bool) {
-        this->mode = climate::CLIMATE_MODE_HEAT;
-      } else {
-        this->mode = climate::CLIMATE_MODE_OFF;
+        if (this->supports_heat_ && this->supports_cool_) {
+          this->mode = climate::CLIMATE_MODE_HEAT_COOL;
+        } else if (this->supports_heat_) {
+          this->mode = climate::CLIMATE_MODE_HEAT;
+        } else if (this->supports_cool_) {
+          this->mode = climate::CLIMATE_MODE_COOL;
+        }
       }
       this->compute_state_();
       this->publish_state();
-      ESP_LOGD(TAG, "MCU reported switch is: %s", ONOFF(datapoint.value_bool));
     });
   }
   if (this->target_temperature_id_.has_value()) {
     this->parent_->register_listener(
         *this->target_temperature_id_, TuyaDatapointType::INTEGER, [this](TuyaDatapoint datapoint) {
           this->target_temperature = datapoint.value_int * this->target_temperature_multiplier_;
+          ESP_LOGD(TAG, "MCU reported target temperature is: %.1f", this->target_temperature);
           this->compute_state_();
           this->publish_state();
-          ESP_LOGD(TAG, "MCU reported target temperature is: %.1f", this->target_temperature);
         });
   }
   if (this->current_temperature_id_.has_value()) {
     this->parent_->register_listener(
         *this->current_temperature_id_, TuyaDatapointType::INTEGER, [this](TuyaDatapoint datapoint) {
           this->current_temperature = datapoint.value_int * this->current_temperature_multiplier_;
+          ESP_LOGD(TAG, "MCU reported current temperature is: %.1f", this->current_temperature);
           this->compute_state_();
           this->publish_state();
-          ESP_LOGD(TAG, "MCU reported current temperature is: %.1f", this->current_temperature);
         });
   }
 }
@@ -58,7 +63,8 @@ void TuyaClimate::control(const climate::ClimateCall &call) {
 climate::ClimateTraits TuyaClimate::traits() {
   auto traits = climate::ClimateTraits();
   traits.set_supports_current_temperature(this->current_temperature_id_.has_value());
-  traits.set_supports_heat_mode(true);
+  traits.set_supports_heat_mode(this->supports_heat_);
+  traits.set_supports_cool_mode(this->supports_cool_);
   traits.set_supports_action(true);
   return traits;
 }
@@ -85,29 +91,14 @@ void TuyaClimate::compute_state_() {
     return;
   }
 
-  const bool too_cold = this->current_temperature < this->target_temperature - 1;
-  const bool too_hot = this->current_temperature > this->target_temperature + 1;
-  const bool on_target = this->current_temperature == this->target_temperature;
-
-  climate::ClimateAction target_action;
-  if (too_cold) {
-    // too cold -> show as heating if possible, else idle
-    if (this->traits().supports_mode(climate::CLIMATE_MODE_HEAT)) {
+  climate::ClimateAction target_action = climate::CLIMATE_ACTION_IDLE;
+  const float temp_diff = this->target_temperature + this->hysteresis_ - this->current_temperature;
+  if (std::abs(temp_diff) > this->hysteresis_) {
+    if (this->supports_heat_ && temp_diff > 0) {
       target_action = climate::CLIMATE_ACTION_HEATING;
-    } else {
-      target_action = climate::CLIMATE_ACTION_IDLE;
-    }
-  } else if (too_hot) {
-    // too hot -> show as cooling if possible, else idle
-    if (this->traits().supports_mode(climate::CLIMATE_MODE_COOL)) {
+    } else if (this->supports_cool_ && temp_diff < 0) {
       target_action = climate::CLIMATE_ACTION_COOLING;
-    } else {
-      target_action = climate::CLIMATE_ACTION_IDLE;
     }
-  } else if (on_target) {
-    target_action = climate::CLIMATE_ACTION_IDLE;
-  } else {
-    target_action = this->action;
   }
   this->switch_to_action_(target_action);
 }
@@ -119,3 +110,15 @@ void TuyaClimate::switch_to_action_(climate::ClimateAction action) {
 
 }  // namespace tuya_new
 }  // namespace esphome
+
+/**
+ *
+ *  18 + 2 - 18
+ *  2 = heating
+ *
+ *  18 + 2 - 19
+ *  1 = heating
+ *
+ *
+ *
+ **/
