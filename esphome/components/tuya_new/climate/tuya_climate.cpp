@@ -63,8 +63,14 @@ void TuyaClimate::control(const climate::ClimateCall &call) {
 climate::ClimateTraits TuyaClimate::traits() {
   auto traits = climate::ClimateTraits();
   traits.set_supports_current_temperature(this->current_temperature_id_.has_value());
-  traits.set_supports_heat_mode(this->supports_heat_);
-  traits.set_supports_cool_mode(this->supports_cool_);
+  std::set<climate::ClimateMode> modes;
+  if (this->supports_heat_) {
+    modes.insert(climate::CLIMATE_MODE_HEAT);
+  }
+  if (this->supports_cool_) {
+    modes.insert(climate::CLIMATE_MODE_COOL);
+  }
+  traits.set_supported_modes(modes);
   traits.set_supports_action(true);
   return traits;
 }
@@ -80,7 +86,7 @@ void TuyaClimate::dump_config() {
 }
 
 void TuyaClimate::compute_state_() {
-  if (isnan(this->current_temperature) || isnan(this->target_temperature)) {
+  if (std::isnan(this->current_temperature) || std::isnan(this->target_temperature)) {
     // if any control parameters are nan, go to OFF action (not IDLE!)
     this->switch_to_action_(climate::CLIMATE_ACTION_OFF);
     return;
