@@ -6,7 +6,7 @@ CODEOWNERS = ["@OttoWinter"]
 json_ns = cg.esphome_ns.namespace("json")
 
 CONFIG_SCHEMA = cv.All(
-    cv.Schema({}),
+    cv.Schema({cv.Optional("test"): cv.boolean}),
     cv.only_with_arduino,
 )
 
